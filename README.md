@@ -9,7 +9,7 @@ prints a `gem uninstall` command which would remove it.
 ## Installation
 
 ~~~
-$ git clone https://github.com/pbrisbin/cruft
+$ git clone https://github.com/pbrisbin/cruft && cd cruft
 $ rake install
 ~~~
 
