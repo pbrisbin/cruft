@@ -9,13 +9,10 @@ module Cruft
     private
 
     def parse_specs(contents)
-      contents.lines do |line|
-        md = line.match(/^(?<name>.*) \((?<versions>.*)\)$/) or return
-
-        md[:versions].split(', ').each do |version|
-          @specs << Spec.new(md[:name], version)
-        end
-      end
+      contents.lines.map do |line|
+        md = line.match(/^(?<name>.*) \((?<versions>.*)\)$/)
+        md[:versions].split(', ').map { |version| Spec.new(md[:name], version) }
+      end.flatten
     end
   end
 end

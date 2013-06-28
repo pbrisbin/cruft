@@ -7,10 +7,7 @@ module Cruft
 
   class Main
     def self.run(lockfiles)
-      if lockfiles.empty?
-        $stderr.puts 'usage: cruft <lockfile> [, <lockfile>, ...]'
-        exit 1
-      end
+      print_usage! if lockfiles.empty?
 
       installed = Manifest.new
 
@@ -26,9 +23,14 @@ module Cruft
 
       installed.each do |name, version|
         unless required.include?(name, version)
-          puts "--> #{name} #{version} not required by any projects"
+          puts "gem uninstall #{name} --version #{version}"
         end
       end
+    end
+
+    def self.print_usage!
+      puts 'usage: cruft <lockfile> [, <lockfile>, ...]'
+      exit 1
     end
   end
 end
