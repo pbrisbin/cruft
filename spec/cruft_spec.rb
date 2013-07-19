@@ -2,27 +2,32 @@ require 'spec_helper'
 
 module Cruft
   describe Main do
-    MOCK_GEMLIST = 'mock gem list'
+    before { $stdout = StringIO.new }
+    after  { $stdout = STDOUT }
 
-    before do
-      Main.stub(:gem_list).and_return(MOCK_GEMLIST)
+    context Spec do
+      context "#uninstall_cmd" do
+        it "is correct" do
+          spec = Spec.new('name', 'version')
 
-      $stdout = StringIO.new
+          expect(spec.uninstall_cmd).to eq(
+            'gem uninstall name --version version'
+          )
+        end
+      end
     end
-
-    after { $stdout = STDOUT }
 
     it "prints usage when given no arguments" do
       begin
-        Main.run []
+        Main.run '', []
       rescue SystemExit
       end
 
-      expect($stdout.string).to match(/^usage: cruft/)
+      expect($stdout.string).to match(/\Ausage: cruft/)
     end
 
     it "prints gem uninstall commands for crufty gems" do
-      expect_new(GemListParser, MOCK_GEMLIST) do |instance|
+      expect_new(GemListParser, 'gem list output') do |instance|
         instance.stub(:specs).and_return([
           Spec.new('foo', '1.0'),
           Spec.new('foo', '1.5'),
@@ -39,7 +44,7 @@ module Cruft
         instance.stub(:specs).and_return([Spec.new('bar', '1.0')])
       end
 
-      Main.run %w( lockfile1 lockfile2 )
+      Main.run 'gem list output', %w( lockfile1 lockfile2 )
 
       expect($stdout.string).to eq [
         'gem uninstall foo --version 1.0',
