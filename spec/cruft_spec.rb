@@ -5,27 +5,6 @@ module Cruft
     before { $stdout = StringIO.new }
     after  { $stdout = STDOUT }
 
-    context Spec do
-      context "#uninstall_cmd" do
-        it "is correct" do
-          spec = Spec.new('name', 'version')
-
-          expect(spec.uninstall_cmd).to eq(
-            'gem uninstall name --version version'
-          )
-        end
-      end
-    end
-
-    it "prints usage when given no arguments" do
-      begin
-        Main.run '', []
-      rescue SystemExit
-      end
-
-      expect($stdout.string).to match(/\Ausage: cruft/)
-    end
-
     it "prints gem uninstall commands for crufty gems" do
       expect_new(GemListParser, 'gem list output') do |instance|
         instance.stub(:specs).and_return([
