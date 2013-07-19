@@ -1,6 +1,5 @@
 require 'cruft/gem_list_parser'
 require 'cruft/lockfile_parser'
-require 'cruft/manifest'
 
 module Cruft
   Spec = Struct.new(:name, :version)
@@ -9,28 +8,25 @@ module Cruft
     def self.run(lockfiles)
       print_usage! if lockfiles.empty?
 
-      installed = Manifest.new
+      installed = GemListParser.new(gem_list).specs
+      required = []
 
-      parser = GemListParser.new(`gem list`)
-      parser.specs.each { |spec| installed.add(spec) }
-
-      required = Manifest.new
-
-      lockfiles.each do |lockfile|
-        parser = LockfileParser.new(File.read(lockfile))
-        parser.specs.each { |spec| required.add(spec) }
+      lockfiles.map do |lockfile|
+        required += LockfileParser.new(File.read(lockfile)).specs
       end
 
-      installed.each do |name, version|
-        unless required.include?(name, version)
-          puts "gem uninstall #{name} --version #{version}"
-        end
+      (installed - required).each do |spec|
+        puts "gem uninstall #{spec.name} --version #{spec.version}"
       end
     end
 
     def self.print_usage!
       puts 'usage: cruft <lockfile> [, <lockfile>, ...]'
       exit 1
+    end
+
+    def self.gem_list
+      `gem list`
     end
   end
 end
